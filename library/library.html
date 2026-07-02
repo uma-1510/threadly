@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Threadly Library</title>
+    <link rel="stylesheet" href="library.css" />
+  </head>
+  <body>
+    <h1>Threadly Library</h1>
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="Search title or messages..." />
+      <select id="platformFilter">
+        <option value="">All platforms</option>
+      </select>
+    </div>
+    <div id="empty" class="hidden">No conversations captured yet.</div>
+    <div id="list"></div>
+
+    <script src="../lib/storage.js"></script>
+    <script src="library.js"></script>
+  </body>
+</html>
