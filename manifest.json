@@ -2,17 +2,23 @@
   "manifest_version": 3,
   "name": "Threadly",
   "version": "0.1.0",
-  "description": "Captures ChatGPT conversations locally so context can be handed off to a new chat.",
+  "description": "Captures AI chat conversations locally so context can be handed off to a new chat.",
   "permissions": ["storage", "activeTab"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
+    "https://claude.ai/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "js": ["lib/storage.js", "content-scripts/chatgpt.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["lib/storage.js", "content-scripts/claude.js"],
       "run_at": "document_idle"
     }
   ],
