@@ -16,6 +16,11 @@ body {
   margin-bottom: 8px;
 }
 
+.header-links {
+  display: flex;
+  gap: 8px;
+}
+
 h1 {
   font-size: 15px;
   margin: 0;
