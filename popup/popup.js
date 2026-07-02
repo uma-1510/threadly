@@ -62,7 +62,9 @@
       return;
     }
 
-    generateStatusEl.textContent = `Done (~${response.estimatedTokens} tokens).`;
+    generateStatusEl.textContent = response.truncated
+      ? `Done (~${response.estimatedTokens} tokens). Response was cut off — try raising the token budget.`
+      : `Done (~${response.estimatedTokens} tokens).`;
     resultEl.value = response.handoff;
     resultBlockEl.classList.remove("hidden");
   }

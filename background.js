@@ -29,20 +29,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const budget = tokenBudget || 800;
       const promptMessages = CKHandoffPrompt.buildHandoffMessages(conversation, budget);
 
-      let handoff = await CKLlmClient.chatCompletion({
+      // maxOutputTokens is a hard API cutoff, not the target length -- give the
+      // model headroom above the requested budget so it can finish every section
+      // instead of getting cut off mid-sentence. The budget itself is enforced
+      // below by trimming the finished response, not by starving the generation.
+      const outputCeiling = Math.max(budget * 2, 1024);
+
+      const { content, finishReason } = await CKLlmClient.chatCompletion({
         apiKey: settings.apiKey,
         model: settings.model,
         baseUrl: settings.baseUrl,
         messages: promptMessages,
-        maxOutputTokens: budget,
+        maxOutputTokens: outputCeiling,
       });
 
-      handoff = CKTokenEstimate.trimTextToBudget(handoff, budget);
+      const handoff = CKTokenEstimate.trimTextToBudget(content, budget);
 
       sendResponse({
         ok: true,
         handoff,
         estimatedTokens: CKTokenEstimate.estimateTokens(handoff),
+        truncated: finishReason === "length",
       });
     } catch (err) {
       sendResponse({ ok: false, error: err.message || String(err) });
