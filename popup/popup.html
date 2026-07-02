@@ -6,13 +6,27 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>Threadly</h1>
+    <div class="header">
+      <h1>Threadly</h1>
+      <button id="openOptions" class="link">Settings</button>
+    </div>
     <div id="status">Loading…</div>
     <div id="summary" class="hidden">
       <div id="title" class="title"></div>
       <div id="count" class="count"></div>
+
+      <label class="budget-label">
+        Token budget
+        <input type="number" id="tokenBudget" value="800" min="100" step="100" />
+      </label>
+      <button id="generate">Generate Handoff</button>
+      <div id="generateStatus"></div>
+
+      <div id="resultBlock" class="hidden">
+        <textarea id="result" readonly rows="10"></textarea>
+        <button id="copy">Copy to clipboard</button>
+      </div>
     </div>
-    <pre id="dump" class="hidden"></pre>
 
     <script src="../lib/storage.js"></script>
     <script src="popup.js"></script>

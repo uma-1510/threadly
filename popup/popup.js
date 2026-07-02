@@ -5,7 +5,15 @@
   const summaryEl = document.getElementById("summary");
   const titleEl = document.getElementById("title");
   const countEl = document.getElementById("count");
-  const dumpEl = document.getElementById("dump");
+  const tokenBudgetEl = document.getElementById("tokenBudget");
+  const generateBtn = document.getElementById("generate");
+  const generateStatusEl = document.getElementById("generateStatus");
+  const resultBlockEl = document.getElementById("resultBlock");
+  const resultEl = document.getElementById("result");
+  const copyBtn = document.getElementById("copy");
+  const openOptionsBtn = document.getElementById("openOptions");
+
+  let currentConversation = null;
 
   function extractConversationId(url) {
     const match = url.pathname.match(/\/c\/([a-zA-Z0-9-]+)/);
@@ -13,25 +21,56 @@
   }
 
   function isChatGptUrl(url) {
-    return (
-      url.hostname === "chatgpt.com" || url.hostname === "chat.openai.com"
-    );
+    return url.hostname === "chatgpt.com" || url.hostname === "chat.openai.com";
   }
 
   function showStatus(text) {
     statusEl.textContent = text;
     statusEl.classList.remove("hidden");
     summaryEl.classList.add("hidden");
-    dumpEl.classList.add("hidden");
   }
 
   function showConversation(conversation) {
+    currentConversation = conversation;
     statusEl.classList.add("hidden");
     summaryEl.classList.remove("hidden");
-    dumpEl.classList.remove("hidden");
     titleEl.textContent = conversation.title;
     countEl.textContent = `${conversation.messages.length} messages captured`;
-    dumpEl.textContent = JSON.stringify(conversation.messages, null, 2);
+    resultBlockEl.classList.add("hidden");
+    generateStatusEl.textContent = "";
+  }
+
+  async function generateHandoff() {
+    if (!currentConversation) return;
+    generateBtn.disabled = true;
+    generateStatusEl.textContent = "Generating…";
+    resultBlockEl.classList.add("hidden");
+
+    const tokenBudget = parseInt(tokenBudgetEl.value, 10) || 800;
+
+    const response = await chrome.runtime.sendMessage({
+      type: "GENERATE_HANDOFF",
+      platform: currentConversation.platform,
+      conversationId: currentConversation.conversationId,
+      tokenBudget,
+    });
+
+    generateBtn.disabled = false;
+
+    if (!response || !response.ok) {
+      generateStatusEl.textContent = response?.error || "Something went wrong.";
+      return;
+    }
+
+    generateStatusEl.textContent = `Done (~${response.estimatedTokens} tokens).`;
+    resultEl.value = response.handoff;
+    resultBlockEl.classList.remove("hidden");
+  }
+
+  async function copyResult() {
+    await navigator.clipboard.writeText(resultEl.value);
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => (copyBtn.textContent = "Copy to clipboard"), 1500);
   }
 
   async function init() {
@@ -63,6 +102,10 @@
 
     showConversation(conversation);
   }
+
+  generateBtn.addEventListener("click", generateHandoff);
+  copyBtn.addEventListener("click", copyResult);
+  openOptionsBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
 
   init();
 })();
