@@ -12,6 +12,7 @@
   const resultEl = document.getElementById("result");
   const copyBtn = document.getElementById("copy");
   const openOptionsBtn = document.getElementById("openOptions");
+  const openLibraryBtn = document.getElementById("openLibrary");
 
   let currentConversation = null;
 
@@ -108,6 +109,9 @@
   generateBtn.addEventListener("click", generateHandoff);
   copyBtn.addEventListener("click", copyResult);
   openOptionsBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
+  openLibraryBtn.addEventListener("click", () =>
+    chrome.tabs.create({ url: chrome.runtime.getURL("library/library.html") })
+  );
 
   init();
 })();
