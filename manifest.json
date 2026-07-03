@@ -3,7 +3,7 @@
   "name": "Threadly",
   "version": "0.1.0",
   "description": "Captures AI chat conversations locally so context can be handed off to a new chat.",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
