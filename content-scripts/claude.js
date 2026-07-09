@@ -117,18 +117,29 @@
   async function refreshUsageLimits() {
     try {
       const orgId = getOrgIdFromCookie();
-      if (!orgId) return;
+      if (!orgId) {
+        console.debug("[Threadly] usage limit fetch skipped: no lastActiveOrg cookie found");
+        return;
+      }
 
       const res = await fetch(`https://claude.ai/api/organizations/${orgId}/usage`, {
         method: "GET",
         credentials: "include",
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        console.debug(`[Threadly] usage limit fetch skipped: HTTP ${res.status}`);
+        return;
+      }
 
-      const parsed = parseUsageResponse(await res.json());
-      if (!parsed) return;
+      const body = await res.json();
+      const parsed = parseUsageResponse(body);
+      if (!parsed) {
+        console.debug("[Threadly] usage limit fetch skipped: unexpected response shape", body);
+        return;
+      }
 
       await CKStorage.saveUsageLimits(PLATFORM, parsed);
+      console.debug("[Threadly] saved usage limits", parsed);
     } catch (err) {
       // Endpoint shape/availability isn't guaranteed -- don't break capture over it.
       console.debug("[Threadly] usage limit fetch skipped:", err);
