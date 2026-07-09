@@ -15,7 +15,10 @@
   const statusEl = document.getElementById("status");
   const summaryEl = document.getElementById("summary");
   const titleEl = document.getElementById("title");
-  const countEl = document.getElementById("count");
+  const metaEl = document.getElementById("meta");
+  const platformLabelEl = document.getElementById("platformLabel");
+  const refreshBtn = document.getElementById("refresh");
+  const updatedAtEl = document.getElementById("updatedAt");
   const tokenBudgetEl = document.getElementById("tokenBudget");
   const generateBtn = document.getElementById("generate");
   const generateStatusEl = document.getElementById("generateStatus");
@@ -26,8 +29,71 @@
   const openLibraryBtn = document.getElementById("openLibrary");
   const continueButtonsEl = document.getElementById("continueButtons");
   const continueStatusEl = document.getElementById("continueStatus");
+  const usageSectionEl = document.getElementById("usageSection");
+  const sessionPctEl = document.getElementById("sessionPct");
+  const sessionBarEl = document.getElementById("sessionBar");
+  const sessionResetEl = document.getElementById("sessionReset");
+  const weeklyPctEl = document.getElementById("weeklyPct");
+  const weeklyBarEl = document.getElementById("weeklyBar");
+  const weeklyResetEl = document.getElementById("weeklyReset");
 
   let currentConversation = null;
+
+  function relativeTime(timestamp) {
+    if (!timestamp) return "";
+    const diffMin = Math.round((Date.now() - timestamp) / 60000);
+    if (diffMin < 1) return "just now";
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.round(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    return `${Math.round(diffHr / 24)}d ago`;
+  }
+
+  function formatRelativeReset(isoString) {
+    if (!isoString) return "";
+    const diffMs = new Date(isoString).getTime() - Date.now();
+    if (diffMs <= 0) return "Resets soon";
+    const hours = Math.floor(diffMs / 3600000);
+    const minutes = Math.round((diffMs % 3600000) / 60000);
+    return `Resets in ${hours}h ${minutes}m`;
+  }
+
+  function formatAbsoluteReset(isoString) {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const weekday = date.toLocaleDateString(undefined, { weekday: "short" });
+    const time = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    return `Resets ${weekday} ${time}`;
+  }
+
+  function setUsageBar(pctEl, barEl, resetEl, window, formatReset) {
+    const pct = Math.round(window.utilization);
+    pctEl.textContent = `${pct}%`;
+    barEl.style.width = `${pct}%`;
+    barEl.classList.toggle("high", pct >= 90);
+    resetEl.textContent = formatReset(window.resetsAt);
+  }
+
+  async function renderUsageLimits(platform) {
+    const usage = await CKStorage.getUsageLimits(platform);
+    if (!usage || (!usage.fiveHour && !usage.sevenDay)) {
+      usageSectionEl.classList.add("hidden");
+      return;
+    }
+
+    usageSectionEl.classList.remove("hidden");
+
+    if (usage.fiveHour) {
+      setUsageBar(sessionPctEl, sessionBarEl, sessionResetEl, usage.fiveHour, formatRelativeReset);
+    }
+    if (usage.sevenDay) {
+      setUsageBar(weeklyPctEl, weeklyBarEl, weeklyResetEl, usage.sevenDay, formatAbsoluteReset);
+    }
+  }
 
   function matchPlatform(url) {
     return PLATFORMS.find((p) => p.hostnames.includes(url.hostname)) || null;
@@ -48,11 +114,22 @@
     currentConversation = conversation;
     statusEl.classList.add("hidden");
     summaryEl.classList.remove("hidden");
+
     titleEl.textContent = conversation.title;
-    countEl.textContent = "Messages successfully captured";
+    platformLabelEl.textContent =
+      "/ " + conversation.platform.charAt(0).toUpperCase() + conversation.platform.slice(1);
+
+    const turns = conversation.messages.length;
+    const tokens = CKTokenEstimate.estimateTokens(
+      conversation.messages.map((m) => m.content).join(" ")
+    );
+    metaEl.textContent = `${turns} turns · ~${tokens} tokens`;
+    updatedAtEl.textContent = "Updated " + relativeTime(conversation.updatedAt);
+
     resultBlockEl.classList.add("hidden");
     generateStatusEl.textContent = "";
     renderContinueButtons(conversation);
+    renderUsageLimits(conversation.platform);
   }
 
   function renderContinueButtons(conversation) {
@@ -167,6 +244,7 @@
   openLibraryBtn.addEventListener("click", () =>
     chrome.tabs.create({ url: chrome.runtime.getURL("library/library.html") })
   );
+  refreshBtn.addEventListener("click", init);
 
   init();
 })();
