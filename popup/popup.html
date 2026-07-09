@@ -10,11 +10,9 @@
       <div class="brand">
         <span class="brand-dot"></span>
         <h1>Threadly</h1>
+        <span id="platformLabel" class="platform-label"></span>
       </div>
-      <div class="header-links">
-        <button id="openLibrary" class="link">Library</button>
-        <button id="openOptions" class="link">Settings</button>
-      </div>
+      <button id="refresh" class="icon-btn" title="Refresh">&#8635;</button>
     </div>
 
     <div id="status">Loading…</div>
@@ -22,13 +20,16 @@
     <div id="summary" class="hidden">
       <div class="chat-info">
         <div id="title" class="title"></div>
-        <div id="count" class="count"></div>
+        <div id="meta" class="meta"></div>
       </div>
 
       <div class="section">
         <div class="section-label">Continue this chat in</div>
         <div id="continueButtons" class="continue-buttons"></div>
         <div id="continueStatus"></div>
+        <div class="continue-caption">
+          Threadly opens the destination tab and pastes the conversation into its input automatically.
+        </div>
       </div>
 
       <div class="section advanced">
@@ -45,10 +46,19 @@
           <button id="copy">Copy to clipboard</button>
         </div>
       </div>
+
+      <div class="footer">
+        <span id="updatedAt" class="updated"></span>
+        <div class="footer-links">
+          <button id="openLibrary" class="link">Library</button>
+          <button id="openOptions" class="link">Settings</button>
+        </div>
+      </div>
     </div>
 
     <script src="../lib/storage.js"></script>
     <script src="../lib/pasteTargets.js"></script>
+    <script src="../lib/tokenEstimate.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
