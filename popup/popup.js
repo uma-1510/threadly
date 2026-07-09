@@ -10,6 +10,16 @@
       hostnames: ["claude.ai"],
       idPattern: /\/chat\/([a-zA-Z0-9-]+)/,
     },
+    {
+      platform: "perplexity",
+      hostnames: ["www.perplexity.ai"],
+      idPattern: /\/search\/([a-zA-Z0-9-]+)/,
+    },
+    {
+      platform: "deepseek",
+      hostnames: ["chat.deepseek.com"],
+      idPattern: /\/a\/chat\/s\/([a-zA-Z0-9-]+)/,
+    },
   ];
 
   const statusEl = document.getElementById("status");
@@ -210,7 +220,7 @@
     const url = new URL(tab.url);
     const platformConfig = matchPlatform(url);
     if (!platformConfig) {
-      showStatus("Open a ChatGPT or Claude conversation tab to see captured data.");
+      showStatus("Open a ChatGPT, Claude, Perplexity, or DeepSeek conversation tab to see captured data.");
       return;
     }
 
