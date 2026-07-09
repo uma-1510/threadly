@@ -84,12 +84,65 @@
     }, 1500);
   }
 
+  function getOrgIdFromCookie() {
+    try {
+      return (
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("lastActiveOrg="))
+          ?.split("=")[1] || null
+      );
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function parseUsageWindow(w) {
+    if (!w || typeof w !== "object") return null;
+    if (typeof w.utilization !== "number" || !Number.isFinite(w.utilization)) return null;
+    return {
+      utilization: Math.max(0, Math.min(100, w.utilization)),
+      resetsAt: typeof w.resets_at === "string" ? w.resets_at : null,
+    };
+  }
+
+  function parseUsageResponse(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    const fiveHour = parseUsageWindow(raw.five_hour);
+    const sevenDay = parseUsageWindow(raw.seven_day);
+    if (!fiveHour && !sevenDay) return null;
+    return { fiveHour, sevenDay };
+  }
+
+  async function refreshUsageLimits() {
+    try {
+      const orgId = getOrgIdFromCookie();
+      if (!orgId) return;
+
+      const res = await fetch(`https://claude.ai/api/organizations/${orgId}/usage`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) return;
+
+      const parsed = parseUsageResponse(await res.json());
+      if (!parsed) return;
+
+      await CKStorage.saveUsageLimits(PLATFORM, parsed);
+    } catch (err) {
+      // Endpoint shape/availability isn't guaranteed -- don't break capture over it.
+      console.debug("[Threadly] usage limit fetch skipped:", err);
+    }
+  }
+
   function init() {
     console.debug("[Threadly] content script loaded on", location.href);
     const observer = new MutationObserver(scheduleSync);
     observer.observe(document.body, { childList: true, subtree: true });
     watchForNavigation();
     scheduleSync(); // in case messages are already on the page at load
+    refreshUsageLimits();
+    setInterval(refreshUsageLimits, 60000);
   }
 
   if (document.readyState === "complete" || document.readyState === "interactive") {
