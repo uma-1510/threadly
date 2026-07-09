@@ -1,35 +1,51 @@
 body {
   width: 360px;
-  max-height: 480px;
+  max-height: 520px;
   overflow-y: auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   margin: 0;
-  padding: 12px;
-  color: #1a1a1a;
+  padding: 14px;
+  background: #1c1d21;
+  color: #e6e6e6;
 }
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.header-links {
+.brand {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0793c;
+  flex-shrink: 0;
 }
 
 h1 {
   font-size: 15px;
   margin: 0;
+  color: #f5f5f5;
+}
+
+.header-links {
+  display: flex;
+  gap: 10px;
 }
 
 .link {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #8ab4f8;
   cursor: pointer;
   font-size: 12px;
   padding: 0;
@@ -39,20 +55,89 @@ h1 {
   display: none;
 }
 
+#status {
+  color: #999;
+  padding: 8px 0;
+}
+
+.chat-info {
+  margin-bottom: 14px;
+}
+
 .title {
   font-weight: 600;
-  margin-bottom: 4px;
+  color: #f5f5f5;
+  margin-bottom: 2px;
 }
 
 .count {
-  color: #555;
+  color: #9a9a9a;
+  font-size: 12px;
+}
+
+.section {
+  border-top: 1px solid #33343a;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8a8b91;
   margin-bottom: 8px;
+}
+
+.continue-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#continueStatus {
+  font-size: 12px;
+  color: #9a9a9a;
+  margin-top: 8px;
+}
+
+.llm-btn {
+  background: #2a2b31;
+  border: 1px solid #3a3b42;
+  color: #e6e6e6;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.llm-btn:hover {
+  background: #34353c;
+}
+
+.llm-btn.primary {
+  background: #3b6fe0;
+  border-color: #3b6fe0;
+  color: #fff;
+}
+
+.llm-btn.primary:hover {
+  background: #4d7cec;
+}
+
+.llm-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.advanced {
+  opacity: 0.9;
 }
 
 .budget-label {
   display: block;
   font-size: 12px;
-  color: #555;
+  color: #9a9a9a;
   margin-bottom: 8px;
 }
 
@@ -60,18 +145,30 @@ h1 {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  margin-top: 2px;
-  padding: 4px 6px;
+  margin-top: 4px;
+  padding: 5px 7px;
+  background: #26272c;
+  border: 1px solid #3a3b42;
+  color: #e6e6e6;
+  border-radius: 4px;
 }
 
 button {
   padding: 6px 10px;
   cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid #3a3b42;
+  background: #2a2b31;
+  color: #e6e6e6;
+}
+
+button:hover {
+  background: #34353c;
 }
 
 #generateStatus {
   font-size: 12px;
-  color: #555;
+  color: #9a9a9a;
   margin-top: 6px;
 }
 
@@ -85,7 +182,9 @@ textarea {
   font-family: monospace;
   font-size: 12px;
   padding: 8px;
-  border: 1px solid #ddd;
+  background: #141517;
+  border: 1px solid #3a3b42;
+  color: #d8d8d8;
   border-radius: 4px;
   resize: vertical;
   margin-bottom: 6px;

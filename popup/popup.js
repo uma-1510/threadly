@@ -1,5 +1,16 @@
 (function () {
-  const PLATFORM = "chatgpt";
+  const PLATFORMS = [
+    {
+      platform: "chatgpt",
+      hostnames: ["chatgpt.com", "chat.openai.com"],
+      idPattern: /\/c\/([a-zA-Z0-9-]+)/,
+    },
+    {
+      platform: "claude",
+      hostnames: ["claude.ai"],
+      idPattern: /\/chat\/([a-zA-Z0-9-]+)/,
+    },
+  ];
 
   const statusEl = document.getElementById("status");
   const summaryEl = document.getElementById("summary");
@@ -13,16 +24,18 @@
   const copyBtn = document.getElementById("copy");
   const openOptionsBtn = document.getElementById("openOptions");
   const openLibraryBtn = document.getElementById("openLibrary");
+  const continueButtonsEl = document.getElementById("continueButtons");
+  const continueStatusEl = document.getElementById("continueStatus");
 
   let currentConversation = null;
 
-  function extractConversationId(url) {
-    const match = url.pathname.match(/\/c\/([a-zA-Z0-9-]+)/);
-    return match ? match[1] : null;
+  function matchPlatform(url) {
+    return PLATFORMS.find((p) => p.hostnames.includes(url.hostname)) || null;
   }
 
-  function isChatGptUrl(url) {
-    return url.hostname === "chatgpt.com" || url.hostname === "chat.openai.com";
+  function extractConversationId(url, idPattern) {
+    const match = url.pathname.match(idPattern);
+    return match ? match[1] : null;
   }
 
   function showStatus(text) {
@@ -36,9 +49,50 @@
     statusEl.classList.add("hidden");
     summaryEl.classList.remove("hidden");
     titleEl.textContent = conversation.title;
-    countEl.textContent = `${conversation.messages.length} messages captured`;
+    countEl.textContent = "Messages successfully captured";
     resultBlockEl.classList.add("hidden");
     generateStatusEl.textContent = "";
+    renderContinueButtons(conversation);
+  }
+
+  function renderContinueButtons(conversation) {
+    continueButtonsEl.innerHTML = "";
+    continueStatusEl.textContent = "";
+
+    const targets = CKPasteTargets.PASTE_TARGETS.filter(
+      (t) => t.platform !== conversation.platform
+    );
+
+    targets.forEach((target, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "llm-btn" + (idx === 0 ? " primary" : "");
+      btn.textContent = target.label;
+      btn.addEventListener("click", () => continueInTarget(target));
+      continueButtonsEl.appendChild(btn);
+    });
+  }
+
+  async function continueInTarget(target) {
+    const buttons = continueButtonsEl.querySelectorAll("button");
+    buttons.forEach((b) => (b.disabled = true));
+    continueStatusEl.textContent = `Generating and opening ${target.label}…`;
+
+    const tokenBudget = parseInt(tokenBudgetEl.value, 10) || 800;
+
+    const response = await chrome.runtime.sendMessage({
+      type: "OPEN_AND_PASTE",
+      platform: currentConversation.platform,
+      conversationId: currentConversation.conversationId,
+      tokenBudget,
+      targetPlatform: target.platform,
+    });
+
+    buttons.forEach((b) => (b.disabled = false));
+
+    continueStatusEl.textContent =
+      response && response.ok
+        ? `Pasted into ${target.label}. Review it there before sending.`
+        : response?.error || "Something went wrong.";
   }
 
   async function generateHandoff() {
@@ -84,12 +138,13 @@
     }
 
     const url = new URL(tab.url);
-    if (!isChatGptUrl(url)) {
-      showStatus("Open a ChatGPT conversation tab to see captured data.");
+    const platformConfig = matchPlatform(url);
+    if (!platformConfig) {
+      showStatus("Open a ChatGPT or Claude conversation tab to see captured data.");
       return;
     }
 
-    const conversationId = extractConversationId(url);
+    const conversationId = extractConversationId(url, platformConfig.idPattern);
     if (!conversationId) {
       showStatus(
         "This looks like a new conversation without a saved ID yet. Send a message, then reopen the popup."
@@ -97,7 +152,7 @@
       return;
     }
 
-    const conversation = await CKStorage.getConversation(PLATFORM, conversationId);
+    const conversation = await CKStorage.getConversation(platformConfig.platform, conversationId);
     if (!conversation) {
       showStatus("No messages captured yet for this conversation.");
       return;

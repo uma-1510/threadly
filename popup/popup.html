@@ -7,31 +7,48 @@
   </head>
   <body>
     <div class="header">
-      <h1>Threadly</h1>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <h1>Threadly</h1>
+      </div>
       <div class="header-links">
         <button id="openLibrary" class="link">Library</button>
         <button id="openOptions" class="link">Settings</button>
       </div>
     </div>
+
     <div id="status">Loading…</div>
+
     <div id="summary" class="hidden">
-      <div id="title" class="title"></div>
-      <div id="count" class="count"></div>
+      <div class="chat-info">
+        <div id="title" class="title"></div>
+        <div id="count" class="count"></div>
+      </div>
 
-      <label class="budget-label">
-        Token budget
-        <input type="number" id="tokenBudget" value="800" min="100" step="100" />
-      </label>
-      <button id="generate">Generate Handoff</button>
-      <div id="generateStatus"></div>
+      <div class="section">
+        <div class="section-label">Continue this chat in</div>
+        <div id="continueButtons" class="continue-buttons"></div>
+        <div id="continueStatus"></div>
+      </div>
 
-      <div id="resultBlock" class="hidden">
-        <textarea id="result" readonly rows="10"></textarea>
-        <button id="copy">Copy to clipboard</button>
+      <div class="section advanced">
+        <div class="section-label">Custom handoff</div>
+        <label class="budget-label">
+          Token budget
+          <input type="number" id="tokenBudget" value="800" min="100" step="100" />
+        </label>
+        <button id="generate">Generate Handoff</button>
+        <div id="generateStatus"></div>
+
+        <div id="resultBlock" class="hidden">
+          <textarea id="result" readonly rows="8"></textarea>
+          <button id="copy">Copy to clipboard</button>
+        </div>
       </div>
     </div>
 
     <script src="../lib/storage.js"></script>
+    <script src="../lib/pasteTargets.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
