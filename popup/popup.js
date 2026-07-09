@@ -15,7 +15,6 @@
   const statusEl = document.getElementById("status");
   const summaryEl = document.getElementById("summary");
   const titleEl = document.getElementById("title");
-  const metaEl = document.getElementById("meta");
   const platformLabelEl = document.getElementById("platformLabel");
   const refreshBtn = document.getElementById("refresh");
   const updatedAtEl = document.getElementById("updatedAt");
@@ -118,12 +117,6 @@
     titleEl.textContent = conversation.title;
     platformLabelEl.textContent =
       "/ " + conversation.platform.charAt(0).toUpperCase() + conversation.platform.slice(1);
-
-    const turns = conversation.messages.length;
-    const tokens = CKTokenEstimate.estimateTokens(
-      conversation.messages.map((m) => m.content).join(" ")
-    );
-    metaEl.textContent = `${turns} turns · ~${tokens} tokens`;
     updatedAtEl.textContent = "Updated " + relativeTime(conversation.updatedAt);
 
     resultBlockEl.classList.add("hidden");
