@@ -29,6 +29,13 @@
   const openLibraryBtn = document.getElementById("openLibrary");
   const continueButtonsEl = document.getElementById("continueButtons");
   const continueStatusEl = document.getElementById("continueStatus");
+  const usageSectionEl = document.getElementById("usageSection");
+  const sessionPctEl = document.getElementById("sessionPct");
+  const sessionBarEl = document.getElementById("sessionBar");
+  const sessionResetEl = document.getElementById("sessionReset");
+  const weeklyPctEl = document.getElementById("weeklyPct");
+  const weeklyBarEl = document.getElementById("weeklyBar");
+  const weeklyResetEl = document.getElementById("weeklyReset");
 
   let currentConversation = null;
 
@@ -40,6 +47,52 @@
     const diffHr = Math.round(diffMin / 60);
     if (diffHr < 24) return `${diffHr}h ago`;
     return `${Math.round(diffHr / 24)}d ago`;
+  }
+
+  function formatRelativeReset(isoString) {
+    if (!isoString) return "";
+    const diffMs = new Date(isoString).getTime() - Date.now();
+    if (diffMs <= 0) return "Resets soon";
+    const hours = Math.floor(diffMs / 3600000);
+    const minutes = Math.round((diffMs % 3600000) / 60000);
+    return `Resets in ${hours}h ${minutes}m`;
+  }
+
+  function formatAbsoluteReset(isoString) {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const weekday = date.toLocaleDateString(undefined, { weekday: "short" });
+    const time = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    return `Resets ${weekday} ${time}`;
+  }
+
+  function setUsageBar(pctEl, barEl, resetEl, window, formatReset) {
+    const pct = Math.round(window.utilization);
+    pctEl.textContent = `${pct}%`;
+    barEl.style.width = `${pct}%`;
+    barEl.classList.toggle("high", pct >= 90);
+    resetEl.textContent = formatReset(window.resetsAt);
+  }
+
+  async function renderUsageLimits(platform) {
+    const usage = await CKStorage.getUsageLimits(platform);
+    if (!usage || (!usage.fiveHour && !usage.sevenDay)) {
+      usageSectionEl.classList.add("hidden");
+      return;
+    }
+
+    usageSectionEl.classList.remove("hidden");
+
+    if (usage.fiveHour) {
+      setUsageBar(sessionPctEl, sessionBarEl, sessionResetEl, usage.fiveHour, formatRelativeReset);
+    }
+    if (usage.sevenDay) {
+      setUsageBar(weeklyPctEl, weeklyBarEl, weeklyResetEl, usage.sevenDay, formatAbsoluteReset);
+    }
   }
 
   function matchPlatform(url) {
@@ -76,6 +129,7 @@
     resultBlockEl.classList.add("hidden");
     generateStatusEl.textContent = "";
     renderContinueButtons(conversation);
+    renderUsageLimits(conversation.platform);
   }
 
   function renderContinueButtons(conversation) {
