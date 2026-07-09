@@ -49,7 +49,7 @@
     statusEl.classList.add("hidden");
     summaryEl.classList.remove("hidden");
     titleEl.textContent = conversation.title;
-    countEl.textContent = `${conversation.messages.length} messages captured`;
+    countEl.textContent = "Messages successfully captured";
     resultBlockEl.classList.add("hidden");
     generateStatusEl.textContent = "";
     renderContinueButtons(conversation);
