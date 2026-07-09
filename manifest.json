@@ -8,6 +8,8 @@
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
     "https://claude.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://chat.deepseek.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "content_scripts": [
@@ -19,6 +21,16 @@
     {
       "matches": ["https://claude.ai/*"],
       "js": ["lib/storage.js", "content-scripts/claude.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.perplexity.ai/*"],
+      "js": ["lib/storage.js", "content-scripts/perplexity.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://chat.deepseek.com/*"],
+      "js": ["lib/storage.js", "content-scripts/deepseek.js"],
       "run_at": "document_idle"
     }
   ],
