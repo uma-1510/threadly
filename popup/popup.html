@@ -23,6 +23,26 @@
         <div id="meta" class="meta"></div>
       </div>
 
+      <div id="usageSection" class="section hidden">
+        <div class="section-label">Your usage limits</div>
+        <div class="usage-row">
+          <div class="usage-row-header">
+            <span>Current session</span>
+            <span id="sessionPct"></span>
+          </div>
+          <div class="usage-bar"><div id="sessionBar" class="usage-bar-fill"></div></div>
+          <div class="usage-caption" id="sessionReset"></div>
+        </div>
+        <div class="usage-row">
+          <div class="usage-row-header">
+            <span>Weekly limit</span>
+            <span id="weeklyPct"></span>
+          </div>
+          <div class="usage-bar"><div id="weeklyBar" class="usage-bar-fill"></div></div>
+          <div class="usage-caption" id="weeklyReset"></div>
+        </div>
+      </div>
+
       <div class="section">
         <div class="section-label">Continue this chat in</div>
         <div id="continueButtons" class="continue-buttons"></div>
