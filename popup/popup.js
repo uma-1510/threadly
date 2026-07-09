@@ -15,7 +15,10 @@
   const statusEl = document.getElementById("status");
   const summaryEl = document.getElementById("summary");
   const titleEl = document.getElementById("title");
-  const countEl = document.getElementById("count");
+  const metaEl = document.getElementById("meta");
+  const platformLabelEl = document.getElementById("platformLabel");
+  const refreshBtn = document.getElementById("refresh");
+  const updatedAtEl = document.getElementById("updatedAt");
   const tokenBudgetEl = document.getElementById("tokenBudget");
   const generateBtn = document.getElementById("generate");
   const generateStatusEl = document.getElementById("generateStatus");
@@ -28,6 +31,16 @@
   const continueStatusEl = document.getElementById("continueStatus");
 
   let currentConversation = null;
+
+  function relativeTime(timestamp) {
+    if (!timestamp) return "";
+    const diffMin = Math.round((Date.now() - timestamp) / 60000);
+    if (diffMin < 1) return "just now";
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.round(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    return `${Math.round(diffHr / 24)}d ago`;
+  }
 
   function matchPlatform(url) {
     return PLATFORMS.find((p) => p.hostnames.includes(url.hostname)) || null;
@@ -48,8 +61,18 @@
     currentConversation = conversation;
     statusEl.classList.add("hidden");
     summaryEl.classList.remove("hidden");
+
     titleEl.textContent = conversation.title;
-    countEl.textContent = "Messages successfully captured";
+    platformLabelEl.textContent =
+      "/ " + conversation.platform.charAt(0).toUpperCase() + conversation.platform.slice(1);
+
+    const turns = conversation.messages.length;
+    const tokens = CKTokenEstimate.estimateTokens(
+      conversation.messages.map((m) => m.content).join(" ")
+    );
+    metaEl.textContent = `${turns} turns · ~${tokens} tokens`;
+    updatedAtEl.textContent = "Updated " + relativeTime(conversation.updatedAt);
+
     resultBlockEl.classList.add("hidden");
     generateStatusEl.textContent = "";
     renderContinueButtons(conversation);
@@ -167,6 +190,7 @@
   openLibraryBtn.addEventListener("click", () =>
     chrome.tabs.create({ url: chrome.runtime.getURL("library/library.html") })
   );
+  refreshBtn.addEventListener("click", init);
 
   init();
 })();
